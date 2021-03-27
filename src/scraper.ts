@@ -8,6 +8,8 @@ import { readStore, writeStore } from './output';
 import fs from 'fs';
 import { News } from './sources/news/model';
 import news from './sources/news';
+import patchNotes from './sources/patch-notes';
+import { PatchNotes } from './sources/patch-notes/model';
 
 const { NODE_ENV, SENTRY_DSN } = process.env;
 
@@ -45,6 +47,28 @@ async function newsScrape(browser: Browser) {
   await Promise.all([tempFunc('news', news)]);
 }
 
+async function patchNotesScrape(browser: Browser) {
+  async function tempFunc(
+    chainName: string,
+    workFunc: (browser: Browser) => Promise<PatchNotes[]>
+  ) {
+    try {
+      const data = await workFunc(browser);
+
+      const store = readStore('patch-notes.json');
+      writeStore('patch-notes.json', {
+        ...store,
+        [chainName]: data,
+      });
+    } catch (e) {
+      console.error(e);
+      Sentry?.captureException(e);
+    }
+  }
+
+  await Promise.all([tempFunc('patch-notes', patchNotes)]);
+}
+
 async function scraper() {
   const isARMMac = process.arch === 'arm64' && process.platform === 'darwin';
 
@@ -58,6 +82,7 @@ async function scraper() {
   });
 
   await newsScrape(browser);
+  await patchNotesScrape(browser);
 
   await browser.close();
 }
