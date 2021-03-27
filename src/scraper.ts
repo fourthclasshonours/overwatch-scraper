@@ -6,6 +6,8 @@ import * as Sentry from '@sentry/node';
 import { readStore, writeStore } from './output';
 
 import fs from 'fs';
+import { News } from './sources/news/model';
+import news from './sources/news';
 
 const { NODE_ENV, SENTRY_DSN } = process.env;
 
@@ -21,12 +23,16 @@ try {
   fs.mkdirSync('traces');
 } catch (e) {}
 
+async function newsScrape(browser: Browser) {
   async function tempFunc(
     chainName: string,
+    workFunc: (browser: Browser) => Promise<News[]>
   ) {
     try {
       const data = await workFunc(browser);
 
+      const store = readStore('news.json');
+      writeStore('news.json', {
         ...store,
         [chainName]: data,
       });
@@ -36,6 +42,7 @@ try {
     }
   }
 
+  await Promise.all([tempFunc('news', news)]);
 }
 
 async function scraper() {
@@ -50,6 +57,7 @@ async function scraper() {
       : undefined,
   });
 
+  await newsScrape(browser);
 
   await browser.close();
 }
