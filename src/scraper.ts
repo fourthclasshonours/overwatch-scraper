@@ -66,7 +66,7 @@ async function patchNotesScrape(browser: Browser) {
     }
   }
 
-  await Promise.all([tempFunc('patch-notes', patchNotes)]);
+  await Promise.all([tempFunc('patch_notes', patchNotes)]);
 }
 
 async function scraper() {
