@@ -25,11 +25,11 @@ export default async function patchNotes(
 
       for (const section of sectionElems) {
         const title =
-          section.querySelector('.PatchNotes-sectionDescription')
-            ?.textContent ?? null;
-        const description =
           section.querySelector('.PatchNotes-sectionTitle')?.textContent ??
           null;
+        const description =
+          section.querySelector('.PatchNotes-sectionDescription')
+            ?.textContent ?? null;
 
         const general_updates: GeneralUpdate[] = [];
 
